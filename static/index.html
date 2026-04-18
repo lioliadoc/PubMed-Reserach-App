@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PubMed Research App</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <h1>PubMed Research App</h1>
+      <p class="intro">
+        Enter a biomedical topic or question. The app checks the prompt, searches PubMed, and shows matching papers.
+      </p>
+
+      <section class="panel">
+        <form id="search-form" class="search-form">
+          <label for="prompt" class="label">Research prompt</label>
+          <textarea
+            id="prompt"
+            name="prompt"
+            rows="5"
+            placeholder="Example: What research does PubMed contain on GLP-1 receptor agonists for obesity?"
+            required
+          ></textarea>
+          <div class="actions">
+            <button id="submit-button" type="submit">Search PubMed</button>
+            <span id="status" class="status" aria-live="polite"></span>
+          </div>
+        </form>
+      </section>
+
+      <section id="result-panel" class="panel hidden" aria-live="polite">
+        <div class="result-header">
+          <div>
+            <p class="result-label">Topic</p>
+            <h2 id="normalized-question"></h2>
+          </div>
+          <div class="count-box">
+            <span class="count-text">Matching papers</span>
+            <strong id="result-count">0</strong>
+          </div>
+        </div>
+
+        <p id="summary" class="summary"></p>
+        <p class="query-line">PubMed query: <code id="pubmed-query"></code></p>
+        <div id="articles" class="article-grid"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Recent searches</h2>
+        <div id="history" class="history-list"></div>
+      </section>
+    </main>
+
+    <template id="article-template">
+      <article class="article-card">
+        <p class="article-meta"></p>
+        <h3 class="article-title"></h3>
+        <p class="article-authors"></p>
+        <a class="article-link" target="_blank" rel="noreferrer">Open in PubMed</a>
+      </article>
+    </template>
+
+    <template id="history-template">
+      <article class="history-card">
+        <p class="article-meta"></p>
+        <h3 class="history-title"></h3>
+        <p class="history-query"></p>
+      </article>
+    </template>
+
+    <script src="/app.js" defer></script>
+  </body>
+  </html>
