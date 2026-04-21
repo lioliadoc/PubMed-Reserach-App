@@ -4,19 +4,6 @@ This project is a small full-stack application for exploring biomedical research
 
 The user enters a natural-language topic or question in the browser. The backend checks whether the prompt is relevant to PubMed, generates a search query, retrieves matching papers, and returns a short summary together with the number of results and the top article titles. The application also stores recent searches in a local SQLite database.
 
-## Features
-
-- browser-based search form
-- backend validation for biomedical / PubMed-relevant prompts
-- PubMed search through a local MCP server
-- concise response with:
-  - normalized topic
-  - generated PubMed query
-  - result count
-  - top matching papers
-  - short summary
-- recent search history stored in SQLite
-
 ## Requirements
 
 - Python 3.10 or later
@@ -27,18 +14,11 @@ Optional environment variables:
 
 - `OPENAI_MODEL`
   - defaults to `gpt-5.4-mini`
-- `OPENAI_BASE_URL`
-  - use this only if you want to point the app to a compatible proxy
-- `NCBI_API_KEY`
-  - optional PubMed / NCBI API key for higher rate limits
-- `NCBI_EMAIL`
-  - recommended when calling NCBI services
 
 ## Running the App
 
 ```bash
 export OPENAI_API_KEY=your_key_here
-export NCBI_EMAIL=email
 python3 app.py
 ```
 
@@ -48,7 +28,7 @@ Open:
 http://127.0.0.1:8000/
 ```
 
-Useful endpoints:
+Endpoints:
 
 - `GET /healthz`
 - `POST /api/search`
@@ -66,6 +46,16 @@ Invalid prompt example:
 
 ```text
 best beaches in Europe
+```
+
+## Running Tests
+
+The project includes a small `unittest` test pack covering the main backend workflow, SQLite persistence, MCP client behavior, and the PubMed MCP server.
+
+Run the tests with:
+
+```bash
+python3 -m unittest discover -s tests -v
 ```
 
 ## How It Works
@@ -100,5 +90,4 @@ Then run:
 ```sql
 .schema search_history
 ```
-
 

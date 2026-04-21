@@ -12,13 +12,19 @@ const articleTemplate = document.getElementById("article-template");
 const historyEl = document.getElementById("history");
 const historyTemplate = document.getElementById("history-template");
 
+function logEvent(event, details = {}) {
+  console.log(`[ui] ${event}`, details);
+}
+
 function setLoading(isLoading, message = "") {
+  logEvent("loading.change", { isLoading, message });
   submitButton.disabled = isLoading;
   submitButton.textContent = isLoading ? "Searching..." : "Search PubMed";
   statusEl.textContent = message;
 }
 
 function renderArticles(articles) {
+  logEvent("articles.render", { count: articles.length });
   articlesEl.innerHTML = "";
   for (const article of articles) {
     const fragment = articleTemplate.content.cloneNode(true);
@@ -41,6 +47,7 @@ function renderArticles(articles) {
 }
 
 function renderError(message) {
+  logEvent("search.error", { message });
   resultPanel.classList.remove("hidden");
   normalizedQuestionEl.textContent = "Input needs correction";
   resultCountEl.textContent = "0";
@@ -50,6 +57,7 @@ function renderError(message) {
 }
 
 function renderHistory(items) {
+  logEvent("history.render", { count: items.length });
   historyEl.innerHTML = "";
 
   if (!items.length) {
@@ -74,13 +82,16 @@ function renderHistory(items) {
 }
 
 async function loadHistory() {
+  logEvent("history.load.start");
   try {
     const response = await fetch("/api/history");
     const data = await response.json();
+    logEvent("history.load.response", { httpOk: response.ok, appOk: data.ok, count: (data.items || []).length });
     if (response.ok && data.ok) {
       renderHistory(data.items || []);
     }
   } catch (error) {
+    logEvent("history.load.error", { error: String(error) });
     historyEl.textContent = "Search history is unavailable.";
   }
 }
@@ -88,6 +99,7 @@ async function loadHistory() {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const prompt = promptInput.value.trim();
+  logEvent("search.submit", { promptLength: prompt.length });
 
   if (!prompt) {
     renderError("Enter a biomedical prompt before searching.");
@@ -96,6 +108,7 @@ form.addEventListener("submit", async (event) => {
 
   setLoading(true, "Validating prompt and fetching research...");
   try {
+    logEvent("search.request.start");
     const response = await fetch("/api/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -103,6 +116,12 @@ form.addEventListener("submit", async (event) => {
     });
 
     const data = await response.json();
+    logEvent("search.request.response", {
+      httpOk: response.ok,
+      appOk: data.ok,
+      status: data.status,
+      resultCount: data.result_count,
+    });
     resultPanel.classList.remove("hidden");
 
     if (!response.ok || !data.ok) {
@@ -116,14 +135,17 @@ form.addEventListener("submit", async (event) => {
     pubmedQueryEl.textContent = data.pubmed_query || "";
     renderArticles(data.articles || []);
     await loadHistory();
+    logEvent("search.success", { resultCount: data.result_count ?? 0 });
     statusEl.textContent = data.result_count
       ? `Loaded ${data.result_count} matching PubMed records.`
       : "No matching PubMed records found.";
   } catch (error) {
+    logEvent("search.request.error", { error: String(error) });
     renderError("The app could not reach the local server or an upstream API.");
   } finally {
     setLoading(false, statusEl.textContent);
   }
 });
 
+logEvent("app.init");
 loadHistory();
